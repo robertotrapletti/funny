@@ -15,4 +15,8 @@ public class BoolVal extends Val{
         return bool;
     }
 
+    public String toString(){
+        return String.valueOf(bool);
+    }
+
 }

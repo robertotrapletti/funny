@@ -13,6 +13,10 @@ public class NumVal extends Val{
     public Val minus(Val rightVal) {
         return new NumVal(num.subtract(rightVal.checkNum()));
     }
+    public Val equal(Val val){
+        return new BoolVal(num.equals(val.checkNum()));
+    }
+
     protected BigDecimal checkNum() {
         return num;
     }
