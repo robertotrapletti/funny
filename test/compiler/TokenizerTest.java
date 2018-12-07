@@ -94,4 +94,12 @@ public class TokenizerTest {
         assertEquals(Type.PLUS,tokenizer.next().getType());
     }
 
+    @Test
+    public void bracketTest(){
+        Tokenizer tokenizer = new Tokenizer(new StringReader("[2]"));
+        assertEquals(Type.OPEN_BRACKET,tokenizer.next().getType());
+        tokenizer.next();
+        assertEquals(Type.CLOSE_BRACKET,tokenizer.next().getType());
+    }
+
 }

@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class InterpreterTest {
 
     @Test
@@ -17,6 +19,6 @@ public class InterpreterTest {
                 "\tprintln(isEven(1002));\n" +
                 "}"));
         Expr expr=compiler.program();
-        new InvokeExpr(expr, new ArrayList<Expr>(0)).eval(null);
+        assertTrue(new InvokeExpr(expr, new ArrayList<>()).eval(null).checkBool());
     }
 }

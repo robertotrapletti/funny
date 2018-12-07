@@ -7,6 +7,8 @@ public class StringVal extends Val {
         this.string = string;
     }
 
+    public StringVal plus(StringVal addString){return new StringVal(this.string+addString);}
+
     public String toString(){
         return string;
     }

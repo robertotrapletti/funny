@@ -62,6 +62,10 @@ public class Tokenizer {
                 return returnToken(Type.CLOSE_PAREN, null, ")");
             case '{':
                 return returnToken(Type.OPEN_BRACE, null, "{");
+            case '[':
+                return returnToken(Type.OPEN_BRACKET,null,"[");
+            case ']':
+                return returnToken(Type.CLOSE_BRACKET,null,"]");
             case '}':
                 return returnToken(Type.CLOSE_BRACE, null, "}");
             case '!':
@@ -133,7 +137,6 @@ public class Tokenizer {
         return returnToken(Type.String, null, name.toString());
     }
 
-    //TODO: implementare numeri scientifici
     private Token number(int value) {
         StringBuilder number = new StringBuilder();
         //example: 13.24E-3
