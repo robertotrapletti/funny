@@ -1,5 +1,6 @@
 package compiler;
 
+import compiler.exceptions.EscapeException;
 import compiler.exceptions.PrevAlreadyCalledException;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class Tokenizer {
         if (Character.isJavaIdentifierStart(value)) {
             return word(value);
         }
-        if (Character.isDigit(value)) {
+        if (Character.isDigit(value)||value=='.') {
             return number(value);
         }
         switch (value) {
@@ -64,6 +65,8 @@ public class Tokenizer {
                 return returnToken(Type.OPEN_BRACE, null, "{");
             case '[':
                 return returnToken(Type.OPEN_BRACKET,null,"[");
+            case '%':
+                return returnToken(Type.MODULO, null, "%");
             case ']':
                 return returnToken(Type.CLOSE_BRACKET,null,"]");
             case '}':
@@ -81,11 +84,21 @@ public class Tokenizer {
         if (next == '*') {
             skipBlockComment(1);
             return next();
-        } else {
+        } else if(next=='/'){
+            skipLineComment();
+            return next();
+        }else {
             reset();
             return opOrOpEqual(Type.DIVISION, "/", Type.DIVISION_EQUAL, "/=");
         }
 
+    }
+
+    private void skipLineComment() {
+        int value = markAndRead(1);
+        while (value != '\n') {
+            value = markAndRead(1);
+        }
     }
 
 
@@ -131,10 +144,30 @@ public class Tokenizer {
         int value = markAndRead(1);
         StringBuilder name = new StringBuilder();
         while (value != '"') {
-            name.append((char) value);
+            if(value==-1)returnToken(Type.EOS,null,"EoS");
+            if(value=='\\'){
+                value=markAndRead(1);
+                name.append(escapeCharacter(value));
+            }else {
+                name.append((char) value);
+            }
             value = markAndRead(1);
         }
         return returnToken(Type.String, null, name.toString());
+    }
+
+    private char escapeCharacter(int value) {
+        switch (value){
+            case 'n':return '\n';
+            case 't':return '\t';
+            case 'r':return '\r';
+            case '"':return '\"';
+            case 'b':return '\b';
+            case 'f':return '\f';
+            case '\\':return '\\';
+            case '\'':return '\'';
+            default: throw new EscapeException();
+        }
     }
 
     private Token number(int value) {

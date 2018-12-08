@@ -11,6 +11,21 @@ public class BoolVal extends Val{
         this.bool = bool;
     }
 
+    public Val equal(Val rightVal) {
+        return new BoolVal(this.bool==rightVal.checkBool());
+    }
+    public Val notEqual(Val rightVal) {
+        return new BoolVal(!(this.bool==rightVal.checkBool()));
+    }
+
+    public Val or(Val rightVal) {
+        return new BoolVal(this.bool||rightVal.checkBool());
+    }
+
+    public Val and(Val rightVal) {
+        return new BoolVal(this.bool&&rightVal.checkBool());
+    }
+
     boolean checkBool(){
         return bool;
     }

@@ -325,13 +325,13 @@ public class Compiler {
     private List<Expr> args(Scope scope) throws SyntaxErrorException, IOException {
         ArrayList<Expr> args = new ArrayList<>();
         checkAndNext(Type.OPEN_PAREN, tokenizer.getCurrentToken());
-
-        args.add(sequence(scope));
-        while (Type.COMMA == getCurrentType()) {
-            next();
+        if(getCurrentType()!=Type.CLOSE_PAREN) {
             args.add(sequence(scope));
+            while (Type.COMMA == getCurrentType()) {
+                next();
+                args.add(sequence(scope));
+            }
         }
-
         checkAndNext(Type.CLOSE_PAREN, tokenizer.getCurrentToken());
         return args;
     }
@@ -352,8 +352,6 @@ public class Compiler {
             case True:
             case False:
                 return bool();
-            case Nil:
-                return nil();
             case String:
                 return string();
             case Id:
@@ -372,7 +370,8 @@ public class Compiler {
             case Println:
                 return print(scope);
             default:
-                throw new CompilerException(tokenizer.getCurrentToken().getString());
+                next();
+                return NilVal.nil;
         }
     }
 
@@ -391,6 +390,7 @@ public class Compiler {
         Expr condExpr = sequence(scope);
         Expr doExpr = new NilVal();
         if (Type.Do == getCurrentType()) {
+            next();
             doExpr = sequence(scope);
         }
         checkAndNext(Type.Od, tokenizer.getCurrentToken());
@@ -435,10 +435,6 @@ public class Compiler {
         return new StringVal(string);
     }
 
-    private NilVal nil() {
-        return new NilVal();
-    }
-
     private BoolVal bool() {
         Type type = getCurrentType();
         next();
@@ -468,7 +464,7 @@ public class Compiler {
         if (type == token.getType()) {
             return true;
         } else {
-            throw new SyntaxErrorException("error");
+            throw new SyntaxErrorException("expected: "+type+", found: "+token.getType());
         }
     }
 

@@ -1,5 +1,7 @@
 package compiler;
 
+import compiler.exceptions.InterpreterException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -21,7 +23,7 @@ public class NumVal extends Val{
         return new NumVal(num.multiply(rightVal.checkNum()));
     }
     public Val div(Val rightVal) {
-        return new NumVal(num.divide(rightVal.checkNum(),6, RoundingMode.CEILING));
+        return new NumVal(num.divide(rightVal.checkNum(),30,RoundingMode.HALF_UP));
     }
     public Val mod(Val rightVal) {
         return new NumVal(num.remainder(rightVal.checkNum()));
@@ -29,6 +31,26 @@ public class NumVal extends Val{
     public Val equal(Val val){
         return new BoolVal(num.equals(val.checkNum()));
     }
+    public Val notEqual(Val val){
+        return new BoolVal(!(num.equals(val.checkNum())));
+    }
+
+    public Val lt(Val rightVal) {
+        return new BoolVal(num.compareTo(rightVal.checkNum()) < 0);
+    }
+
+    public Val le(Val rightVal) {
+        return new BoolVal(num.compareTo(rightVal.checkNum()) <= 0);
+    }
+
+    public Val gt(Val rightVal) {
+        return new BoolVal(num.compareTo(rightVal.checkNum()) > 0);
+    }
+
+    public Val ge(Val rightVal) {
+        return new BoolVal(num.compareTo(rightVal.checkNum()) >= 0);
+    }
+
 
     protected BigDecimal checkNum() {
         return num;

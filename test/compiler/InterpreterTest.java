@@ -3,12 +3,21 @@ package compiler;
 import compiler.exceptions.SyntaxErrorException;
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InterpreterTest {
+
+    @Test
+    public void test1() throws Exception, SyntaxErrorException {
+        Compiler cmp = new Compiler(new BufferedReader(new FileReader(new File("/Users/robertotrapletti/Google Drive/Scuola/SUPSI/I4P/Compilatori e interpreti/code/funny/out/test/funny/program.funny"))));
+        Expr expr=cmp.program();
+        new InvokeExpr(expr, new ArrayList<>()).eval(null);
+    }
 
     @Test
     public void printTest() throws Exception, SyntaxErrorException {
@@ -21,4 +30,5 @@ public class InterpreterTest {
         Expr expr=compiler.program();
         assertTrue(new InvokeExpr(expr, new ArrayList<>()).eval(null).checkBool());
     }
+
 }

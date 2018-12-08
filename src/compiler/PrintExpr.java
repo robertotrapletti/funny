@@ -19,10 +19,12 @@ public class PrintExpr extends Expr {
 
         LinkedList<Val> vals = args.stream()
                 .map(arg -> arg.eval(env)).collect(Collectors.toCollection(LinkedList::new));
-        vals.forEach(System.out::print);
+
+        vals.forEach(val-> System.out.print(val.toString()));
+
         if (isNewLine)
             System.out.println();
-        return vals.getLast();
+        return vals.size()==0?NilVal.nil:vals.getLast();
 
     }
 }
