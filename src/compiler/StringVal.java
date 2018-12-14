@@ -7,7 +7,7 @@ public class StringVal extends Val {
         this.string = string;
     }
 
-    public Val plus(Val addString){return new StringVal(this.string+addString.toString());}
+
 
     public Val equal(Val rightVal) {
         return new BoolVal(this.string.equals(rightVal.toString()));

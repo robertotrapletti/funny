@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /*
@@ -75,7 +76,6 @@ public class Compiler {
 
     }
 
-    //TODO: tokenizer with currentToken as field (next as void)
     private void next() {
         tokenizer.next();
     }
@@ -101,11 +101,18 @@ public class Compiler {
         checkAndNext(Type.OPEN_BRACE, tokenizer.getCurrentToken());
         ArrayList<String> params = optParams();
         ArrayList<String> locals = optLocals();
-        //TODO:check duplicates
+        ArrayList<String> temps = new ArrayList<String>(params);
+        temps.addAll(locals);
+        checkDuplicate(temps);
         Expr expr = optSequence(new Scope(locals, params, scope));
         checkAndNext(Type.CLOSE_BRACE, tokenizer.getCurrentToken());
         FunExpr funExpr = new FunExpr(expr, params, locals);
         return funExpr;
+    }
+
+    private void checkDuplicate(ArrayList<String> list) {
+        if(new HashSet<>(list).size() != list.size())
+            throw new DuplicateException("found some duplicates");
     }
 
 
@@ -240,7 +247,7 @@ public class Compiler {
     #####################################################################################*/
     private Expr equality(Scope scope) throws SyntaxErrorException, IOException {
         Expr comparision = comparision(scope);
-        if (Type.EQUALITY == getCurrentType() || Type.INEQUALITY == getCurrentType()) {
+        if (isEquality()) {
             Type logicalType = getCurrentType();
             next();
             return new BinaryExpr(comparision, logicalType, comparision(scope));
@@ -248,15 +255,15 @@ public class Compiler {
         return comparision;
     }
 
+    private boolean isEquality(){
+        return Type.EQUALITY == getCurrentType() || Type.INEQUALITY == getCurrentType();
+    }
     /*#####################################################################################
     * comparison ::= add ( ( "<" | "<=" | ">" | ">=" ) add )? .
     #####################################################################################*/
     private Expr comparision(Scope scope) throws SyntaxErrorException, IOException {
         Expr add = add(scope);
-        if (Type.LESS_THAN == getCurrentType() ||
-                Type.LESS_EQUAL_THAN == getCurrentType() ||
-                Type.GREATHER_THAN == getCurrentType() ||
-                Type.GREATHER_EQUAL_THEN == getCurrentType()) {
+        if (isCompareOp()) {
             Type logicalType = getCurrentType();
             next();
             return new BinaryExpr(add, logicalType, add(scope));
@@ -264,13 +271,19 @@ public class Compiler {
         return add;
     }
 
+    private boolean isCompareOp() {
+        return Type.LESS_THAN == getCurrentType() ||
+                Type.LESS_EQUAL_THAN == getCurrentType() ||
+                Type.GREATHER_THAN == getCurrentType() ||
+                Type.GREATHER_EQUAL_THEN == getCurrentType();
+    }
+
     /*#####################################################################################
     add ::= mult ( ( "+" | "-" ) mult )* .
     #####################################################################################*/
     private Expr add(Scope scope) throws SyntaxErrorException, IOException {
         Expr expr=mult(scope);
-        while (Type.PLUS == getCurrentType() ||
-                Type.MINUS == getCurrentType()) {
+        while (isPlusOrMinus()) {
             Type type=getCurrentType();
             next();
             expr= new BinaryExpr(expr,type,mult(scope));
@@ -278,14 +291,17 @@ public class Compiler {
         return expr;
     }
 
+    private boolean isPlusOrMinus() {
+        return Type.PLUS == getCurrentType() ||
+                Type.MINUS == getCurrentType();
+    }
+
     /*#####################################################################################
     mult ::= unary ( ( "*" | "/" | "%" ) unary )* .
     #####################################################################################*/
     private Expr mult(Scope scope) throws SyntaxErrorException, IOException {
         Expr expr=unary(scope);
-        while (Type.MULTIPLICATION == getCurrentType() ||
-                Type.DIVISION == getCurrentType() ||
-                Type.MODULO == getCurrentType()) {
+        while (isMultOperand()) {
             Type type=getCurrentType();
             next();
             expr= new BinaryExpr(expr,type,unary(scope));
@@ -293,19 +309,29 @@ public class Compiler {
         return expr;
     }
 
+    private boolean isMultOperand() {
+        return Type.MULTIPLICATION == getCurrentType() ||
+                Type.DIVISION == getCurrentType() ||
+                Type.MODULO == getCurrentType();
+    }
+
     /*#####################################################################################
     unary ::= ( "+" | "-" | "!" ) unary
 	| postfix .
     #####################################################################################*/
     private Expr unary(Scope scope) throws SyntaxErrorException, IOException {
-        if (Type.PLUS == getCurrentType() ||
-                Type.MINUS == getCurrentType() ||
-                Type.BANG == getCurrentType()) {
+        if (isUnaryOp()) {
             Type sign = getCurrentType();
             next();
             return new UnaryExpr(sign, unary(scope));
         }
         return postfix(scope);
+    }
+
+    private boolean isUnaryOp() {
+        return Type.PLUS == getCurrentType() ||
+                Type.MINUS == getCurrentType() ||
+                Type.BANG == getCurrentType();
     }
 
     /*#####################################################################################

@@ -166,7 +166,7 @@ public class Tokenizer {
             case 'f':return '\f';
             case '\\':return '\\';
             case '\'':return '\'';
-            default: throw new EscapeException();
+            default: throw new EscapeException("error");
         }
     }
 

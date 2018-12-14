@@ -27,6 +27,8 @@ abstract class Val extends Expr {
         throw new InterpreterException("operation not permitted");
     }
 
+    public Val plus(Val addString){return new StringVal(this.toString()+addString.toString());}
+
     public Val lt(Val rightVal) {
         throw new InterpreterException("operation not permitted");
     }
@@ -43,9 +45,6 @@ abstract class Val extends Expr {
         throw new InterpreterException("operation not permitted");
     }
 
-    public Val plus(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
-    }
 
     public Val minus(Val rightVal) {
         throw new InterpreterException("operation not permitted");

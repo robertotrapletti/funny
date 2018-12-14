@@ -17,6 +17,8 @@ public class NumVal extends Val{
         return new NumVal(num.subtract(rightVal.checkNum()));
     }
     public Val plus(Val rightVal) {
+        if(rightVal instanceof StringVal)
+            return new StringVal(num.toString()+rightVal.toString());
         return new NumVal(num.add(rightVal.checkNum()));
     }
     public Val mult(Val rightVal) {
@@ -29,7 +31,7 @@ public class NumVal extends Val{
         return new NumVal(num.remainder(rightVal.checkNum()));
     }
     public Val equal(Val val){
-        return new BoolVal(num.equals(val.checkNum()));
+        return new BoolVal(num.compareTo(val.checkNum())==0);
     }
     public Val notEqual(Val val){
         return new BoolVal(!(num.equals(val.checkNum())));
@@ -50,6 +52,7 @@ public class NumVal extends Val{
     public Val ge(Val rightVal) {
         return new BoolVal(num.compareTo(rightVal.checkNum()) >= 0);
     }
+
 
 
     protected BigDecimal checkNum() {
