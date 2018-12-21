@@ -20,11 +20,11 @@ abstract class Val extends Expr {
     }
 
     public Val equal(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
+        return BoolVal.val(this==rightVal);
     }
 
     public Val notEqual(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
+        return BoolVal.val(this!=rightVal);
     }
 
     public Val lt(Val rightVal) {
@@ -43,8 +43,8 @@ abstract class Val extends Expr {
         throw new InterpreterException("operation not permitted");
     }
 
-    public Val plus(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
+    public Val plus(Val addString) {
+        return new StringVal(this.toString()+addString.toString());
     }
 
     public Val minus(Val rightVal) {

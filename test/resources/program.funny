@@ -1,10 +1,8 @@
-/*
 { ->
 	print("Hello, world!\n");
 	print("Hi!", "\n");
 	println("你好");
 }
-*/
 
 
 /*
@@ -13,7 +11,7 @@
     _false = {(t f) -> f};
     _if = {(c t e) -> c(t, e)()};
 
-    println(_if(_true, {-> while true do {} od}, {-> "False"}))
+    println(_if(_false, {-> while true do {} od}, {-> "False"}))
 }
 */
 
@@ -37,8 +35,6 @@
     println("sqrt(", x, "): ", sqrt(x));
 }
 */
-
-
 
 /*
 {coin change ->
@@ -106,17 +102,17 @@
 */
 
 
-
+/*
 {isOdd isEven ->
 	isOdd = {(n) -> if n == 0 then false else isEven(n - 1) fi};
 	isEven = {(n) -> if n == 0 then true else isOdd(n - 1) fi};
 
 	println(isEven(1000));
 }
-
+*/
 
 /*
-{-> println({->} + "a")}
+{-> println({->} + " a")}
 */
 
 /*
@@ -199,5 +195,3 @@
     println(head(head(tail(tree))));
 }
 */
-
-// a line comment

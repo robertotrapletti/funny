@@ -2,28 +2,30 @@ package compiler;
 
 public class BoolVal extends Val{
 
+    private final static BoolVal _true= new BoolVal(true);
+    private final static BoolVal _false= new BoolVal(false);
     private boolean bool;
 
-    public BoolVal(Type type) {
-        this.bool = type == Type.True;
-    }
-    public BoolVal(boolean bool) {
+    private BoolVal(boolean bool) {
         this.bool = bool;
     }
 
+    static BoolVal val(Type b){return b==Type.True?_true:_false;}
+    static BoolVal val(boolean b){return b?_true:_false;}
+
     public Val equal(Val rightVal) {
-        return new BoolVal(this.bool==rightVal.checkBool());
+        return BoolVal.val(this.bool==rightVal.checkBool());
     }
     public Val notEqual(Val rightVal) {
-        return new BoolVal(!(this.bool==rightVal.checkBool()));
+        return BoolVal.val(!(this.bool==rightVal.checkBool()));
     }
 
     public Val or(Val rightVal) {
-        return new BoolVal(this.bool||rightVal.checkBool());
+        return BoolVal.val(this.bool||rightVal.checkBool());
     }
 
     public Val and(Val rightVal) {
-        return new BoolVal(this.bool&&rightVal.checkBool());
+        return BoolVal.val(this.bool&&rightVal.checkBool());
     }
 
     boolean checkBool(){

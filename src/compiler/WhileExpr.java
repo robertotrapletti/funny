@@ -14,10 +14,9 @@ public class WhileExpr extends Expr {
 
     @Override
     Val eval(Env env) {
-        Val val=NilVal.nil;
         while (condExpr.eval(env).checkBool() != isNot) {
-            val=doExpr.eval(env);
+            doExpr.eval(env);
         }
-        return val;
+        return NilVal.nil;
     }
 }

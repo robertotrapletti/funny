@@ -17,8 +17,11 @@ public class NumVal extends Val{
         return new NumVal(num.subtract(rightVal.checkNum()));
     }
     public Val plus(Val rightVal) {
+        if(rightVal instanceof StringVal)
+            return new StringVal(num.toString()+rightVal.toString());
         return new NumVal(num.add(rightVal.checkNum()));
     }
+
     public Val mult(Val rightVal) {
         return new NumVal(num.multiply(rightVal.checkNum()));
     }
@@ -29,26 +32,30 @@ public class NumVal extends Val{
         return new NumVal(num.remainder(rightVal.checkNum()));
     }
     public Val equal(Val val){
-        return new BoolVal(num.equals(val.checkNum()));
+        try{
+            return BoolVal.val(num.compareTo(val.checkNum())==0);
+        }catch (InterpreterException e){
+            return BoolVal.val(false);
+        }
     }
     public Val notEqual(Val val){
-        return new BoolVal(!(num.equals(val.checkNum())));
+        return BoolVal.val(num.compareTo(val.checkNum())!=0);
     }
 
     public Val lt(Val rightVal) {
-        return new BoolVal(num.compareTo(rightVal.checkNum()) < 0);
+        return BoolVal.val(num.compareTo(rightVal.checkNum()) < 0);
     }
 
     public Val le(Val rightVal) {
-        return new BoolVal(num.compareTo(rightVal.checkNum()) <= 0);
+        return BoolVal.val(num.compareTo(rightVal.checkNum()) <= 0);
     }
 
     public Val gt(Val rightVal) {
-        return new BoolVal(num.compareTo(rightVal.checkNum()) > 0);
+        return BoolVal.val(num.compareTo(rightVal.checkNum()) > 0);
     }
 
     public Val ge(Val rightVal) {
-        return new BoolVal(num.compareTo(rightVal.checkNum()) >= 0);
+        return BoolVal.val(num.compareTo(rightVal.checkNum()) >= 0);
     }
 
 

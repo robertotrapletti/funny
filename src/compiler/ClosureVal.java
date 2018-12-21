@@ -19,4 +19,5 @@ public class ClosureVal extends Val {
     ClosureVal checkClosure(){
         return this;
     }
+
 }

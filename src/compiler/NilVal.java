@@ -1,5 +1,12 @@
 package compiler;
 
 public class NilVal extends Val {
-    public final static NilVal nil=new NilVal();
+    final static NilVal nil=new NilVal();
+
+    private NilVal(){}
+
+    public String toString(){
+        return "nil";
+    }
+
 }

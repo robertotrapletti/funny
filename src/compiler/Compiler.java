@@ -6,60 +6,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-/*
- *
- * EBNF grammar for Funny
-
-variable *names* start with lowercase, token *names* start with Uppercase.
-
-----
-
-program ::= function Eos .
-
-function ::= "{" optParams optLocals optSequence "}" .
-optParams ::= ( "(" optIds ")" )? .
-optLocals ::= optIds .
-optSequence ::= ( "->" sequence )? .
-optIds::= id* .
-id ::= Id .
-
-sequence ::= optAssignment ( ";" optAssignment )* .
-optAssignment := assignment? .
-assignment ::= Id ( "=" | "+=" | "-=" | "*=" | "/=" | "%=" ) assignment
-	| logicalOr .
-
-logicalOr ::= logicalAnd ( "||" logicalOr )? .
-logicalAnd ::= equality ( "&&" logicalAnd )? .
-equality ::= comparison ( ( "==" | "!=" ) comparison )? .
-comparison ::= add ( ( "<" | "<=" | ">" | ">=" ) add )? .
-add ::= mult ( ( "+" | "-" ) mult )* .
-mult ::= unary ( ( "*" | "/" | "%" ) unary )* .
-unary ::= ( "+" | "-" | "!" ) unary
-	| postfix .
-
-postfix ::= primary args* .
-args ::= "(" ( sequence ( "," sequence )* )? ")" .
-primary ::= checkNum | bool | nil | string
-	| getId
-	| function
-	| subsequence
-	| cond
-	| loop
-	| print .
-
-checkNum ::= Num .
-bool ::= True | False .
-nil ::= Nil .
-string ::= String .
-getId ::= Id .
-subsequence ::= "(" sequence ")" .
-cond ::= ( "if" | "ifnot" ) sequence "then" sequence ( "else" sequence )? "fi" .
-loop ::= ( "while" | "whilenot" ) sequence ( "do" sequence )? "od" .
-print ::= ( "print" | "println" ) args .
-*/
-
 
 public class Compiler {
 
@@ -75,12 +23,9 @@ public class Compiler {
 
     }
 
-    //TODO: tokenizer with currentToken as field (next as void)
     private void next() {
         tokenizer.next();
     }
-
-
 
     /*#####################################################################################
      * program ::= function Eos .
@@ -101,14 +46,19 @@ public class Compiler {
         checkAndNext(Type.OPEN_BRACE, tokenizer.getCurrentToken());
         ArrayList<String> params = optParams();
         ArrayList<String> locals = optLocals();
-        //TODO:check duplicates
+        ArrayList<String> temps=new ArrayList<>(params);
+        temps.addAll(locals);
+        checkDuplicate(temps);
         Expr expr = optSequence(new Scope(locals, params, scope));
         checkAndNext(Type.CLOSE_BRACE, tokenizer.getCurrentToken());
         FunExpr funExpr = new FunExpr(expr, params, locals);
         return funExpr;
     }
 
-
+    private void checkDuplicate(List list) {
+        if(new HashSet<>(list).size()!=list.size())
+            throw new DuplicateException("Found duplicate");
+    }
 
         /*#####################################################################################
          * optParams ::= ( "(" optIds ")" )? .
@@ -182,7 +132,7 @@ public class Compiler {
     * optAssignment := assignment? .
     #####################################################################################*/
     private Expr optAssignement(Scope scope) throws SyntaxErrorException, IOException {
-        return isBeginOfAssignment()?assignment(scope):null;
+        return isBeginOfAssignment() ? assignment(scope) : null;
     }
 
     /*#####################################################################################
@@ -218,7 +168,7 @@ public class Compiler {
         Expr lAnd = logicalAnd(scope);
         if (Type.OR == getCurrentType()) {
             next();
-            return new BinaryExpr(lAnd, Type.OR,logicalOr(scope));
+            return new BinaryExpr(lAnd, Type.OR, logicalOr(scope));
         }
         return lAnd;
     }
@@ -230,7 +180,7 @@ public class Compiler {
         Expr equality = equality(scope);
         if (Type.AND == getCurrentType()) {
             next();
-            return new BinaryExpr(equality, Type.AND,logicalAnd(scope));
+            return new BinaryExpr(equality, Type.AND, logicalAnd(scope));
         }
         return equality;
     }
@@ -240,7 +190,7 @@ public class Compiler {
     #####################################################################################*/
     private Expr equality(Scope scope) throws SyntaxErrorException, IOException {
         Expr comparision = comparision(scope);
-        if (Type.EQUALITY == getCurrentType() || Type.INEQUALITY == getCurrentType()) {
+        if (isEqualOperator()) {
             Type logicalType = getCurrentType();
             next();
             return new BinaryExpr(comparision, logicalType, comparision(scope));
@@ -248,15 +198,16 @@ public class Compiler {
         return comparision;
     }
 
+    private boolean isEqualOperator() {
+        return Type.EQUALITY == getCurrentType() || Type.INEQUALITY == getCurrentType();
+    }
+
     /*#####################################################################################
     * comparison ::= add ( ( "<" | "<=" | ">" | ">=" ) add )? .
     #####################################################################################*/
     private Expr comparision(Scope scope) throws SyntaxErrorException, IOException {
         Expr add = add(scope);
-        if (Type.LESS_THAN == getCurrentType() ||
-                Type.LESS_EQUAL_THAN == getCurrentType() ||
-                Type.GREATHER_THAN == getCurrentType() ||
-                Type.GREATHER_EQUAL_THEN == getCurrentType()) {
+        if (isCompareOperator()) {
             Type logicalType = getCurrentType();
             next();
             return new BinaryExpr(add, logicalType, add(scope));
@@ -264,33 +215,48 @@ public class Compiler {
         return add;
     }
 
+    private boolean isCompareOperator() {
+        return Type.LESS_THAN == getCurrentType() ||
+                Type.LESS_EQUAL_THAN == getCurrentType() ||
+                Type.GREATHER_THAN == getCurrentType() ||
+                Type.GREATHER_EQUAL_THEN == getCurrentType();
+    }
+
     /*#####################################################################################
     add ::= mult ( ( "+" | "-" ) mult )* .
     #####################################################################################*/
     private Expr add(Scope scope) throws SyntaxErrorException, IOException {
-        Expr expr=mult(scope);
-        while (Type.PLUS == getCurrentType() ||
-                Type.MINUS == getCurrentType()) {
-            Type type=getCurrentType();
+        Expr expr = mult(scope);
+        while (isAddOp()) {
+            Type type = getCurrentType();
             next();
-            expr= new BinaryExpr(expr,type,mult(scope));
+            expr = new BinaryExpr(expr, type, mult(scope));
         }
         return expr;
+    }
+
+    private boolean isAddOp() {
+        return Type.PLUS == getCurrentType() ||
+                Type.MINUS == getCurrentType();
     }
 
     /*#####################################################################################
     mult ::= unary ( ( "*" | "/" | "%" ) unary )* .
     #####################################################################################*/
     private Expr mult(Scope scope) throws SyntaxErrorException, IOException {
-        Expr expr=unary(scope);
-        while (Type.MULTIPLICATION == getCurrentType() ||
-                Type.DIVISION == getCurrentType() ||
-                Type.MODULO == getCurrentType()) {
-            Type type=getCurrentType();
+        Expr expr = unary(scope);
+        while (isMultOp()) {
+            Type type = getCurrentType();
             next();
-            expr= new BinaryExpr(expr,type,unary(scope));
+            expr = new BinaryExpr(expr, type, unary(scope));
         }
         return expr;
+    }
+
+    private boolean isMultOp() {
+        return Type.MULTIPLICATION == getCurrentType() ||
+                Type.DIVISION == getCurrentType() ||
+                Type.MODULO == getCurrentType();
     }
 
     /*#####################################################################################
@@ -298,14 +264,18 @@ public class Compiler {
 	| postfix .
     #####################################################################################*/
     private Expr unary(Scope scope) throws SyntaxErrorException, IOException {
-        if (Type.PLUS == getCurrentType() ||
-                Type.MINUS == getCurrentType() ||
-                Type.BANG == getCurrentType()) {
+        if (isUnaryOp()) {
             Type sign = getCurrentType();
             next();
             return new UnaryExpr(sign, unary(scope));
         }
         return postfix(scope);
+    }
+
+    private boolean isUnaryOp() {
+        return Type.PLUS == getCurrentType() ||
+                Type.MINUS == getCurrentType() ||
+                Type.BANG == getCurrentType();
     }
 
     /*#####################################################################################
@@ -314,7 +284,7 @@ public class Compiler {
     private Expr postfix(Scope scope) throws SyntaxErrorException, IOException {
         Expr expr = primary(scope);
         while (Type.OPEN_PAREN == getCurrentType()) {
-            expr= new InvokeExpr(expr, args(scope));
+            expr = new InvokeExpr(expr, args(scope));
         }
         return expr;
     }
@@ -325,7 +295,7 @@ public class Compiler {
     private List<Expr> args(Scope scope) throws SyntaxErrorException, IOException {
         ArrayList<Expr> args = new ArrayList<>();
         checkAndNext(Type.OPEN_PAREN, tokenizer.getCurrentToken());
-        if(getCurrentType()!=Type.CLOSE_PAREN) {
+        if (getCurrentType() != Type.CLOSE_PAREN) {
             args.add(sequence(scope));
             while (Type.COMMA == getCurrentType()) {
                 next();
@@ -388,7 +358,7 @@ public class Compiler {
         Type type = getCurrentType();
         next();
         Expr condExpr = sequence(scope);
-        Expr doExpr = new NilVal();
+        Expr doExpr = NilVal.nil;
         if (Type.Do == getCurrentType()) {
             next();
             doExpr = sequence(scope);
@@ -406,7 +376,7 @@ public class Compiler {
         Expr condExpr = sequence(scope);
         checkAndNext(Type.Then, tokenizer.getCurrentToken());
         Expr thenExpr = sequence(scope);
-        Expr elseExpr = new NilVal();
+        Expr elseExpr = NilVal.nil;
         if (Type.Else == getCurrentType()) {
             next();
             elseExpr = sequence(scope);
@@ -438,7 +408,7 @@ public class Compiler {
     private BoolVal bool() {
         Type type = getCurrentType();
         next();
-        return new BoolVal(type);
+        return BoolVal.val(type);
     }
 
     private NumVal num() {
@@ -464,7 +434,7 @@ public class Compiler {
         if (type == token.getType()) {
             return true;
         } else {
-            throw new SyntaxErrorException("expected: "+type+", found: "+token.getType());
+            throw new SyntaxErrorException("expected: " + type + ", found: " + token.getType());
         }
     }
 
@@ -472,17 +442,28 @@ public class Compiler {
         return tokenizer.getCurrentToken().getType();
     }
 
-    private boolean isBeginOfAssignment(){
-        switch (getCurrentType()){
+    private boolean isBeginOfAssignment() {
+        switch (getCurrentType()) {
             case Id:
-            case PLUS:case MINUS:case BANG:
-            case Num: case True:case False:
-            case Nil:case String:case OPEN_BRACE:
-            case OPEN_PAREN:case If:case Ifnot:
-            case While:case Whilenot:
-            case Println:case Print:return true;
-            default:return false;
-
+            case PLUS:
+            case MINUS:
+            case BANG:
+            case Num:
+            case True:
+            case False:
+            case Nil:
+            case String:
+            case OPEN_BRACE:
+            case OPEN_PAREN:
+            case If:
+            case Ifnot:
+            case While:
+            case Whilenot:
+            case Println:
+            case Print:
+                return true;
+            default:
+                return false;
         }
     }
 }
