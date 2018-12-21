@@ -5,6 +5,10 @@ import compiler.exceptions.InterpreterException;
 import java.util.HashMap;
 import java.util.List;
 
+// TODO: MIGLIORIA EXTRA: come miglioria -> il compilatore potrebbe trasformare ogni nome in un indice, si potrebbero usare quindi degli indici
+// invece di nomi emette quindi indici hashmap
+
+
 public class Frame {
     private HashMap<String, Val> map = new HashMap<>();
 

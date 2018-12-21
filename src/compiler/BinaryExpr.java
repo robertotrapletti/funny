@@ -16,10 +16,16 @@ public class BinaryExpr extends Expr {
     Val eval(Env env) {
         //left to right evaluation
         Val leftVal=left.eval(env);
+
+        if(op == Type.OR){
+            return leftVal.checkBool() ? leftVal : leftVal.or(right.eval(env));
+        }else if(op == Type.AND){
+            return  !leftVal.checkBool() ? leftVal : leftVal.and(right.eval(env));
+        }
+
         Val rightVal=right.eval(env);
         switch (op){
-            case OR:return leftVal.or(rightVal);
-            case AND:return leftVal.and(rightVal);
+
             case EQUALITY:return leftVal.equal(rightVal);
             case INEQUALITY:return leftVal.notEqual(rightVal);
             case LESS_THAN:return leftVal.lt(rightVal);

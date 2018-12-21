@@ -72,7 +72,7 @@ public class Tokenizer {
             case '}':
                 return returnToken(Type.CLOSE_BRACE, null, "}");
             case '!':
-                return returnToken(Type.BANG, null, "!");
+                return opOrOpEqual(Type.BANG, "!",Type.INEQUALITY, "!=");
             case -1:
                 return returnToken(Type.EOS, null, "EoS");
         }

@@ -23,7 +23,7 @@ public class UnaryExpr extends Expr {
             case MINUS:
                 return new NumVal(BigDecimal.ZERO).minus(val);
             case BANG:
-                return new BoolVal(!val.checkBool());
+                return BoolVal.val(!val.checkBool());
             default:
                 throw new InterpreterException("cannot understand sign: "+sign.toString());
 

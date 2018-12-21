@@ -10,10 +10,10 @@ public class StringVal extends Val {
 
 
     public Val equal(Val rightVal) {
-        return new BoolVal(this.string.equals(rightVal.toString()));
+        return BoolVal.val(this.string.equals(rightVal.toString()));
     }
     public Val notEqual(Val rightVal) {
-        return new BoolVal(!(this.string.equals(rightVal.toString())));
+        return BoolVal.val(!(this.string.equals(rightVal.toString())));
     }
 
     public String toString(){

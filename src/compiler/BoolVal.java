@@ -2,14 +2,16 @@ package compiler;
 
 public class BoolVal extends Val{
 
+    final static BoolVal _true = new BoolVal(true);
+    final static BoolVal _false = new BoolVal(false);
     private boolean bool;
 
-    public BoolVal(Type type) {
-        this.bool = type == Type.True;
-    }
-    public BoolVal(boolean bool) {
+    private BoolVal(boolean bool) {
         this.bool = bool;
     }
+
+    public static BoolVal val(boolean b){return b?_true:_false;}
+    public static BoolVal val(Type b){return b==Type.True ?_true:_false;}
 
     public Val equal(Val rightVal) {
         return new BoolVal(this.bool==rightVal.checkBool());

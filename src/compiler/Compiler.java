@@ -414,7 +414,7 @@ public class Compiler {
         Type type = getCurrentType();
         next();
         Expr condExpr = sequence(scope);
-        Expr doExpr = new NilVal();
+        Expr doExpr = NilVal.nil;
         if (Type.Do == getCurrentType()) {
             next();
             doExpr = sequence(scope);
@@ -432,7 +432,7 @@ public class Compiler {
         Expr condExpr = sequence(scope);
         checkAndNext(Type.Then, tokenizer.getCurrentToken());
         Expr thenExpr = sequence(scope);
-        Expr elseExpr = new NilVal();
+        Expr elseExpr = NilVal.nil;
         if (Type.Else == getCurrentType()) {
             next();
             elseExpr = sequence(scope);
@@ -464,7 +464,7 @@ public class Compiler {
     private BoolVal bool() {
         Type type = getCurrentType();
         next();
-        return new BoolVal(type);
+        return BoolVal.val(type);
     }
 
     private NumVal num() {

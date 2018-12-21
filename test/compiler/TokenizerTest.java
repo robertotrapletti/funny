@@ -102,4 +102,11 @@ public class TokenizerTest {
         assertEquals(Type.CLOSE_BRACKET,tokenizer.next().getType());
     }
 
+    @Test
+    public void bangTest(){
+        Tokenizer tokenizer = new Tokenizer(new StringReader("p!=2"));
+        assertEquals(Type.Id,tokenizer.next().getType());
+        assertEquals(Type.INEQUALITY,tokenizer.next().getType());
+        assertEquals(Type.Num,tokenizer.next().getType());
+    }
 }

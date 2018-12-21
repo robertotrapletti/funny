@@ -19,14 +19,13 @@ abstract class Val extends Expr {
         throw new InterpreterException("operation not permitted");
     }
 
-    public Val equal(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
+    public Val equal(Val rightVal){
+        return BoolVal.val(this == rightVal);
     }
 
-    public Val notEqual(Val rightVal) {
-        throw new InterpreterException("operation not permitted");
+    public Val notEqual(Val rightVal){
+        return BoolVal.val(this != rightVal);
     }
-
     public Val plus(Val addString){return new StringVal(this.toString()+addString.toString());}
 
     public Val lt(Val rightVal) {
